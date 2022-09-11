@@ -78,7 +78,71 @@ class BlogView(APIView):
             },satus=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+    def patch(self,request):
+        try:
+            data = request.data
 
+            blog = Blog.objects.get(uuid=data['uuid'])
+
+
+            if request.user != blog.user:
+                return Response({
+                    'data':{},
+                    'message': 'You are not authorized to edit this blog',
+                },status=status.HTTP_401_UNAUTHORIZED)
+
+            serializer = BlogSerializer(blog, data=data, partial=True)
+
+            if not serializer.is_valid():
+                return Response({
+                    'data': serializer.errors,
+                    'message': 'Invalid data',
+                }, status=400)
+            
+            serializer.save()
+
+            return Response({
+                'data': serializer.data,
+                'message': 'Blog updated successfully',
+            }, status=200)
+
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'data':{},
+                'message': 'Something went wrong',
+            },satus=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+    def delete(self,request):
+        try:
+            data = request.data
+
+            blog = Blog.objects.get(uuid=data['uuid'])
+
+
+            if request.user != blog.user:
+                return Response({
+                    'data':{},
+                    'message': 'You are not authorized to delete this blog',
+                },status=status.HTTP_401_UNAUTHORIZED)
+
+            blog.delete()
+
+            return Response({
+                'data': {},
+                'message': 'Blog deleted successfully',
+            }, status=200)
+
+
+        except Exception as e:
+            print(e)
+            return Response({
+                'data':{},
+                'message': 'Something went wrong',
+            },satus=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
